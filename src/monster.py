@@ -12,19 +12,8 @@ class Monster(Character):
         print("The Monster object is being destroyed by the garbage collector")
         super().__del__()
     
-    def monster_attacks(self, weather=None):
-        attack_power = random.randint(1, 6) + self.m_combat_strength
-        
-        # Apply weather effects if provided
-        if weather:
-            from functions import get_weather_effects
-            weather_effect = get_weather_effects(weather)
-            attack_power += weather_effect["monster_effect"]
-            
-            # Ensure attack power is at least 1
-            attack_power = max(1, attack_power)
-            
-        return attack_power
+    def monster_attacks(self):
+        return random.randint(1, 6) + self.m_combat_strength
     
     @property
     def m_combat_strength(self):

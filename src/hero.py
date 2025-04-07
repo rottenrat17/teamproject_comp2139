@@ -7,21 +7,43 @@ class Hero(Character):
         # Roll dice for combat strength and health points
         self.combat_strength = random.randint(1, 6)
         self.health_points = random.randint(1, 6) + random.randint(1, 6)
+        # New attributes for loot system
+        self.level = 1
+        self.experience = 0
+        self.inventory = []
     
     def __del__(self):
         print("The Hero object is being destroyed by the garbage collector")
         super().__del__()
     
-    def hero_attacks(self, weather=None):
-        attack_power = random.randint(1, 6) + self.combat_strength
+    def hero_attacks(self):
+        return random.randint(1, 6) + self.combat_strength
+    
+    def add_to_inventory(self, item):
+        """Add an item to hero's inventory"""
+        self.inventory.append(item)
+        print(f"Added {item.name} to inventory!")
+    
+    def gain_experience(self, amount):
+        """Gain experience and level up if enough experience is gained"""
+        self.experience += amount
+        # Level up if experience reaches 100 * current level
+        if self.experience >= 100 * self.level:
+            self.level += 1
+            print(f"LEVEL UP! Hero is now level {self.level}")
+            # Boost stats on level up
+            self.combat_strength += 1
+            self.health_points += 2
+            return True
+        return False
+    
+    def show_inventory(self):
+        """Display the hero's inventory"""
+        if not self.inventory:
+            print("Inventory is empty")
+            return
         
-        # Apply weather effects if provided
-        if weather:
-            from functions import get_weather_effects
-            weather_effect = get_weather_effects(weather)
-            attack_power += weather_effect["hero_effect"]
-            
-            # Ensure attack power is at least 1
-            attack_power = max(1, attack_power)
-            
-        return attack_power 
+        print("\n--- Hero Inventory ---")
+        for i, item in enumerate(self.inventory, 1):
+            print(f"{i}. {item}")
+        print("---------------------") 
