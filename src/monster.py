@@ -2,28 +2,59 @@ from character import Character
 import random
 
 class Monster(Character):
-    """
-    Represents a monster in the game. Inherits from Character.
-    Handles monster-specific attack logic.
-    """
     def __init__(self):
         super().__init__()
-    
-    def monster_attacks(self, hero):
-        """
-        Simulates the monster attacking the hero.
-        Reduces the hero's health points based on the monster's combat strength.
-        """
-        print(f"Monster attacks! Monster Strength: {self.combat_strength}, Hero HP: {hero.health_points}")
-        if self.combat_strength >= hero.health_points:
-            hero.health_points = 0
-            print("The monster has defeated the hero!")
-        else:
-            hero.health_points -= self.combat_strength
-            print(f"The hero now has {hero.health_points} HP left.")
+        # Roll dice for combat strength and health points
+        self.__m_combat_strength = random.randint(1, 6)
+        self.__m_health_points = random.randint(1, 6) + random.randint(1, 6)
     
     def __del__(self):
-        try:
-            print("The Monster object is being destroyed by the garbage collector")
-        except Exception as e:
-            print(f"Error during destruction: {e}")
+        print("The Monster object is being destroyed by the garbage collector")
+        super().__del__()
+    
+    def monster_attacks(self, weather=None):
+        attack_power = random.randint(1, 6) + self.m_combat_strength
+        
+        # Apply weather effects if provided
+        if weather:
+            from functions import get_weather_effects
+            weather_effect = get_weather_effects(weather)
+            attack_power += weather_effect["monster_effect"]
+            
+            # Ensure attack power is at least 1
+            attack_power = max(1, attack_power)
+            
+        return attack_power
+    
+    @property
+    def m_combat_strength(self):
+        return self.__m_combat_strength
+    
+    @m_combat_strength.setter
+    def m_combat_strength(self, value):
+        self.__m_combat_strength = value
+    
+    @property
+    def m_health_points(self):
+        return self.__m_health_points
+    
+    @m_health_points.setter
+    def m_health_points(self, value):
+        self.__m_health_points = value
+        
+    # Properties to maintain compatibility with Character class
+    @property
+    def combat_strength(self):
+        return self.m_combat_strength
+    
+    @combat_strength.setter
+    def combat_strength(self, value):
+        self.m_combat_strength = value
+    
+    @property
+    def health_points(self):
+        return self.m_health_points
+    
+    @health_points.setter
+    def health_points(self, value):
+        self.m_health_points = value 
