@@ -1,4 +1,2 @@
-Hero won. Player1 earned 3 stars.
-Hero won. Player1 earned 3 stars.
-Hero won. Player1 earned 3 stars.
-Hero won. Player1 earned 3 stars.
+1
+2
