@@ -1,23 +1,38 @@
+import random
+
 class Character:
+    """
+    Base class for characters in the game. 
+    Handles combat strength and health points.
+    """
     def __init__(self):
-        self.__combat_strength = 0
-        self.__health_points = 0
-    
-    def __del__(self):
-        print("The Character object is being destroyed by the garbage collector")
+        self._combat_strength = random.randint(1, 6)
+        self._health_points = random.randint(1, 20)
     
     @property
     def combat_strength(self):
-        return self.__combat_strength
+        return self._combat_strength
     
     @combat_strength.setter
     def combat_strength(self, value):
-        self.__combat_strength = value
+        if 1 <= value <= 6:
+            self._combat_strength = value
+        else:
+            raise ValueError("Combat strength must be between 1 and 6.")
     
     @property
     def health_points(self):
-        return self.__health_points
+        return self._health_points
     
     @health_points.setter
     def health_points(self, value):
-        self.__health_points = value 
+        if value >= 0:
+            self._health_points = value
+        else:
+            raise ValueError("Health points cannot be negative.")
+    
+    def __del__(self):
+        try:
+            print(f"The {self.__class__.__name__} object is being destroyed by the garbage collector")
+        except Exception as e:
+            print(f"Error during destruction: {e}")
