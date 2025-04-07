@@ -5,10 +5,19 @@ from functions import roll_dice, save_game, load_game, dream_levels
 from hero import Hero
 from monster import Monster
 from quest_system import QuestSystem, Quest
+from companion import Companion  # Import the new Companion class
 
 # Print Python version and OS information
 print(f"Python Version: {platform.python_version()}")
 print(f"Operating System: {os.name}")
+
+# Define available companions
+available_companions = [
+    Companion("Luna", "Healer"),
+    Companion("Brutus", "Fighter"),
+    Companion("Aegis", "Guardian"),
+    Companion("Mystic", "Mage")
+]
 
 # Testing Functions
 def fight_monster(hero, monster, monsters_killed=0):
@@ -18,6 +27,13 @@ def fight_monster(hero, monster, monsters_killed=0):
     print("\n--- Fight Begins ---")
     print(f"Hero Health: {hero.health_points}, Combat Strength: {hero.combat_strength}")
     print(f"Monster Health: {monster.m_health_points}, Combat Strength: {monster.m_combat_strength}")
+    
+    # Allow hero to use companion ability before the fight if they have one
+    if hero.companion:
+        use_companion = input(f"Do you want {hero.companion.name} to assist you? (y/n): ")
+        if use_companion.lower() == 'y':
+            hero.use_companion_ability()
+            print(f"Updated Hero stats - Health: {hero.health_points}, Combat Strength: {hero.combat_strength}")
     
     round_count = 1
     
@@ -141,11 +157,67 @@ def handle_quests(hero, quest_system):
     
     return True
 
+def handle_companion(hero):
+    """
+    Handle companion selection and abilities
+    """
+    while True:
+        print("\n--- Companion Menu ---")
+        print(f"Current companion: {hero.companion.name if hero.companion else 'None'}")
+        print("1. Choose a companion")
+        print("2. View companion details")
+        print("3. Use companion ability")
+        print("0. Return to main game")
+        
+        choice = input("Enter your choice: ")
+        
+        if choice == "1":
+            print("\nAvailable Companions:")
+            for i, companion in enumerate(available_companions):
+                print(f"{i+1}. {companion.name} - {companion.role.capitalize()}")
+            
+            companion_choice = input("\nSelect a companion number (or 0 to cancel): ")
+            try:
+                companion_idx = int(companion_choice) - 1
+                if companion_idx < 0:
+                    continue
+                    
+                selected_companion = available_companions[companion_idx]
+                hero.set_companion(selected_companion)
+            except (ValueError, IndexError):
+                print("Invalid choice.")
+                
+        elif choice == "2":
+            if hero.companion:
+                print(f"\nCompanion: {hero.companion.name}")
+                print(f"Role: {hero.companion.role.capitalize()}")
+                print(f"Power: {hero.companion.power}")
+                
+                if hero.companion.role == "healer":
+                    print(f"Ability: Heals {hero.name} for {hero.companion.power} HP")
+                elif hero.companion.role == "fighter":
+                    print(f"Ability: Boosts {hero.name}'s attack by {hero.companion.power}")
+                elif hero.companion.role == "guardian":
+                    print(f"Ability: Provides +2 HP and +1 attack bonus")
+                else:
+                    print("Ability: Unknown")
+            else:
+                print("You don't have a companion yet.")
+                
+        elif choice == "3":
+            if hero.companion:
+                hero.use_companion_ability()
+            else:
+                print("You don't have a companion to use an ability.")
+                
+        elif choice == "0":
+            return
+
 def main():
     """
     Main game loop
     """
-    print("\nWelcome to the Hero vs Monster Game with Dynamic Quest System!")
+    print("\nWelcome to the Hero vs Monster Game with Dynamic Quest System and Companion Support!")
     
     # Initialize variables
     monsters_killed = 0
@@ -154,6 +226,9 @@ def main():
     # Initialize quest system
     quest_system = QuestSystem()
     
+    # Get player name
+    player_name = input("Enter your hero's name (or press Enter for default): ")
+    
     # Load game if available
     load_option = input("Do you want to load a saved game? (y/n): ")
     if load_option.lower() == "y":
@@ -161,19 +236,37 @@ def main():
         quest_system.load_quest_progress()
     
     # Create hero object
-    hero = Hero()
+    hero = Hero(player_name if player_name else "Adventurer")
     
     # Set hero health from saved game if available
     if loaded_health:
         hero.health_points = loaded_health
     
+    # Choose initial companion
+    print("\n--- Choose Your Starting Companion ---")
+    print("A companion will aid you in your journey!")
+    for i, companion in enumerate(available_companions):
+        print(f"{i+1}. {companion.name} - {companion.role.capitalize()}")
+    
+    companion_choice = input("\nSelect a companion number (or 0 to journey alone): ")
+    try:
+        companion_idx = int(companion_choice) - 1
+        if companion_idx >= 0:
+            selected_companion = available_companions[companion_idx]
+            hero.set_companion(selected_companion)
+    except (ValueError, IndexError):
+        print("Invalid choice. You'll start your journey alone.")
+    
     while hero.health_points > 0:
         print("\n--- Main Menu ---")
-        print(f"Hero Health: {hero.health_points}, Combat Strength: {hero.combat_strength}")
+        print(f"Hero: {hero.name} - Health: {hero.health_points}, Combat Strength: {hero.combat_strength}")
+        if hero.companion:
+            print(f"Companion: {hero.companion.name} the {hero.companion.role.capitalize()}")
         print("1. Enter a dream level")
         print("2. Access quest system")
-        print("3. Save game")
-        print("4. Quit")
+        print("3. Manage companion")
+        print("4. Save game")
+        print("5. Quit")
         
         choice = input("Enter your choice: ")
         
@@ -199,13 +292,17 @@ def main():
             if not handle_quests(hero, quest_system):
                 print("\nGame Over! The hero has fallen during a quest.")
                 break
-            
+                
         elif choice == "3":
+            # Access companion system
+            handle_companion(hero)
+            
+        elif choice == "4":
             # Save game
             save_game(hero.health_points, monsters_killed)
             quest_system.save_quest_progress()
             
-        elif choice == "4":
+        elif choice == "5":
             print("Thanks for playing!")
             break
     
